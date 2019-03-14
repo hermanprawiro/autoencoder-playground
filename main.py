@@ -13,15 +13,16 @@ def main():
     weight_decay = 1e-5
     batch_size = 128
     start_epoch = 0
-    max_epoch = 2
+    max_epoch = 50
 
     train_transforms = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor()
     ])
 
-    # trainset = torchvision.datasets.STL10('./data', transform=train_transforms)
-    trainset = torchvision.datasets.MNIST('./data', transform=train_transforms)
-    testset = torchvision.datasets.MNIST('./data', train=False, transform=train_transforms)
+    trainset = torchvision.datasets.STL10('./data', split='train', transform=train_transforms)
+    testset = torchvision.datasets.STL10('./data', split='test', transform=train_transforms)
+    # trainset = torchvision.datasets.MNIST('./data', transform=train_transforms)
+    # testset = torchvision.datasets.MNIST('./data', train=False, transform=train_transforms)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=8)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=8)
     
@@ -29,8 +30,8 @@ def main():
     model = conv2d.Conv2DAE().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     # optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, weight_decay=weight_decay, nesterov=True)
-    criterion = nn.MSELoss()
-    # criterion = nn.L1Loss()
+    # criterion = nn.MSELoss(reduction='mean')
+    criterion = nn.L1Loss(reduction='mean')
 
     for epoch in range(start_epoch, max_epoch):
         train(model, trainloader, criterion, optimizer, epoch)
